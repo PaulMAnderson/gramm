@@ -180,7 +180,6 @@ end
         % with NaNs work
         %If X binning was requested we do it
         binranges=linspace(obj.var_lim.minx,obj.var_lim.maxx,params.bin_in+1);
-        bincenters=(binranges(1:(end-1))+binranges(2:end))/2;
         uni_x=(binranges(1:(end-1))+binranges(2:end))/2;
         [~,binind]=my_histcounts(x,binranges,'count');
         binind = [1 find(diff(binind(1,:))) size(x,2)];
@@ -188,11 +187,12 @@ end
   %       sel=binind~=0; %histcounts can return zero as bin index if NaN data we remove them here
         newX = repmat(bincenters,size(x,1),1);
         newY = zeros(size(y,1),length(bincenters));
-        for j = 1:length(binranges)-1
-            newY(:,j) = sum(y(:,binind(j):binind(j+1),:),2);
+        for j = 1:length(binranges)
+            newY(:,j) = sum(y(:,binind(j):binind(j+1),:));
         end
-        x=newX;
-        y=newY;
+            
+        x=bincenters(binind(sel));
+        y=y(sel);
     end
     
     if ischar(params.type) && ~isempty(strfind(params.type,'fit'))

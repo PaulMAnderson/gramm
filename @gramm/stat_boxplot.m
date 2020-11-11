@@ -136,8 +136,10 @@ end
 obj.results.stat_boxplot{obj.result_ind,1}.lower_whisker_handle=line([boxmid' ; boxmid'],[p(:,1)' ; p(:,2)'],'Color','k');
 obj.results.stat_boxplot{obj.result_ind,1}.upper_whisker_handle=line([boxmid' ; boxmid'],[p(:,end-1)' ; p(:,end)'],'Color','k');
 
-%Draw outliers
-obj.results.stat_boxplot{obj.result_ind,1}.outliers_handle=plot(boxmid(outliersx),outliersy,'o','MarkerEdgeColor','none','MarkerFaceColor',draw_data.color);
+%Draw outliers - Modified to not draw outliers
+% obj.results.stat_boxplot{obj.result_ind,1}.outliers_handle=plot(boxmid(outliersx),outliersy,'o','MarkerEdgeColor','none','MarkerFaceColor',draw_data.color);
+% Alternative that highlights the outliers
+obj.results.stat_boxplot{obj.result_ind,1}.outliers_handle=plot(boxmid(outliersx),outliersy,'o','MarkerEdgeColor','k','MarkerFaceColor',draw_data.color);
 
 %Adjust limits
 obj.plot_lim.maxx(obj.current_row,obj.current_column)=max(max(boxright),obj.plot_lim.maxx(obj.current_row,obj.current_column));

@@ -229,7 +229,9 @@ else
     % for the color we switch to continuous color
     if isnan(obj.continuous_color_options.active)
         if length(uni_color)>15 && ~iscellstr(uni_color)
-            obj.continuous_color_options.active = true;
+           obj.continuous_color_options.active = true;
+%            % Hack to allow > 15 color options
+%            obj.continuous_color_options.active = false;
         else
             obj.continuous_color_options.active = false;
         end
@@ -351,6 +353,14 @@ for ind_row=1:length(uni_row)
                 obj.plot_lim.maxy(obj.current_row,obj.current_column));
             obj.plot_lim.miny(obj.current_row,obj.current_column)=min(allmin(tmp_y_for_min(sel_column)),...
                 obj.plot_lim.miny(obj.current_row,obj.current_column));
+            
+
+                        % Added 5-8-20 PMA - had weird issues with continuous colors
+%             obj.plot_lim.maxc(obj.current_row,obj.current_column)=max(allmax(temp_aes.color(sel_column)),...
+%                 obj.plot_lim.maxc(obj.current_row,obj.current_column));
+%             obj.plot_lim.minc(obj.current_row,obj.current_column)=min(allmin(temp_aes.color(sel_column)),...
+%                 obj.plot_lim.minc(obj.current_row,obj.current_column));
+            
             
             if ~isempty(temp_aes.z) 
                 obj.plot_lim.maxz(obj.current_row,obj.current_column)=max(allmax(temp_aes.z(sel_column)),...
