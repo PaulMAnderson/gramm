@@ -180,8 +180,9 @@ end
         % with NaNs work
         %If X binning was requested we do it
         binranges=linspace(obj.var_lim.minx,obj.var_lim.maxx,params.bin_in+1);
+        binWidth = round( (obj.var_lim.maxx - obj.var_lim.minx) ./ params.bin_in , 4);
         bincenters=(binranges(1:(end-1))+binranges(2:end))/2;
-        uni_x=(binranges(1:(end-1))+binranges(2:end))/2;
+        % uni_x=(binranges(1:(end-1))+binranges(2:end))/2;
         [~,binind]=my_histcounts(x,binranges,'count');
         binind = [1 find(diff(binind(1,:))) size(x,2)];
         uni_x=bincenters;
@@ -191,8 +192,17 @@ end
         for j = 1:length(binranges)-1
             newY(:,j) = sum(y(:,binind(j):binind(j+1),:),2);
         end
+        
+        
+        newY =  newY ./ binWidth; % dividing by binWidth should give us the rate in Hz
+        % Fix the limits
+        obj.plot_lim.miny = floor( min(min(newY)) );
+        % obj.plot_lim.maxy = ceil( max(mean(newY)) );
+        obj.plot_lim.maxy = ceil( max(mean(newY)+(std(newY) ./ sqrt(size(newY,2)))) );
+        
         x=newX;
         y=newY;
+        
     end
     
     if ischar(params.type) && ~isempty(strfind(params.type,'fit'))
