@@ -1,4 +1,4 @@
-function hndl=my_errorbar(X,L,U,width,color,linewidth)
+function hndl=my_errorbar(ax, X,L,U,width,color,linewidth)
     %Make all sizes work
     X=shiftdim(X)';
     L=shiftdim(L)';
@@ -8,5 +8,5 @@ function hndl=my_errorbar(X,L,U,width,color,linewidth)
     %NaN points
     xcoords=[X ; X ;  nanarray ; X-width/2 ; X+width/2 ; nanarray ; X-width/2 ; X+width/2 ; nanarray ];
     ycoords=[L ; U ;  nanarray ; U  ; U  ; nanarray ; L ; L ; nanarray];
-    hndl=line(xcoords(:),ycoords(:),'Color',color,'LineWidth',linewidth);
+    hndl=line(ax, xcoords(:),ycoords(:),'Color',color,'LineWidth',linewidth);
 end

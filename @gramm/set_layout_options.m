@@ -34,9 +34,13 @@ function obj = set_layout_options( obj , varargin )
 %                   'redraw_gap' is used. Default values are with ticks [0.06 0.06],
 %                   without ticks [0.02 0.02], facet wrap [0.09 0.03].
 
+% Modified by Paul Anderson 27-04-21
+% Added 'omit_legend' parameter, to allow not drawing specific legend types
+
 p=inputParser;
 my_addParameter(p,'position' , 'auto' );
 my_addParameter(p,'legend', true );
+my_addParameter(p,'omit_legend',[]);
 my_addParameter(p,'legend_width', 'auto' );
 my_addParameter(p,'legend_position', 'auto' );
 my_addParameter(p,'title_centering', 'axes');

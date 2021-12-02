@@ -100,7 +100,7 @@ end
 %If draw() is called a second time without update() having been
 %called we skip
 if (~obj.updater.first_draw && ~obj.updater.updated)
-    warning('Multiple draw() calls need update() calls')
+    % warning('Multiple draw() calls need update() calls')
     return
 end
 
@@ -355,13 +355,13 @@ for ind_row=1:length(uni_row)
                 obj.plot_lim.miny(obj.current_row,obj.current_column));
             
 
-                        % Added 5-8-20 PMA - had weird issues with continuous colors
+%             % Added 5-8-20 PMA - had weird issues with continuous colors
 %             obj.plot_lim.maxc(obj.current_row,obj.current_column)=max(allmax(temp_aes.color(sel_column)),...
 %                 obj.plot_lim.maxc(obj.current_row,obj.current_column));
 %             obj.plot_lim.minc(obj.current_row,obj.current_column)=min(allmin(temp_aes.color(sel_column)),...
 %                 obj.plot_lim.minc(obj.current_row,obj.current_column));
-            
-            
+%             
+%             
             if ~isempty(temp_aes.z) 
                 obj.plot_lim.maxz(obj.current_row,obj.current_column)=max(allmax(temp_aes.z(sel_column)),...
                     obj.plot_lim.maxz(obj.current_row,obj.current_column));
@@ -417,9 +417,11 @@ for ind_row=1:length(uni_row)
         
         %Make axes current
         axes(obj.facet_axes_handles(ind_row,ind_column));
+        obj.current_facet_axes = obj.facet_axes_handles(ind_row,ind_column);
+        % Can use this is lower level plotting to selec the write axis
+        % handle to plot into
         
-        
-        hold on
+        hold(obj.current_facet_axes,'on');
         
         %Draw polygons before plotting data, so data isn't covered up
         if obj.polygon.on
@@ -696,7 +698,7 @@ if obj.updater.first_draw
         obj.legend_axe_handle=axes('Position',obj.layout_options.legend_position,...
                 'Parent',obj.parent);
     end
-    hold on
+    hold(obj.legend_axe_handle,'on')
     set(obj.legend_axe_handle,'Visible','off','NextPlot','add');
     %set(obj.legend_axe_handle,'PlotBoxAspectRatio',[1 1 1]);
 else
@@ -712,7 +714,10 @@ if obj.layout_options.legend
     % If the color groups are the same as marker, linestyle or size groups
     % then there will be a common legend (handled by the marker, linestyle
     % or size legend).
-    if length(str_uni_color)>1 && any(strcmp(obj.color_options.legend,{'separate','separate_gray'})) % && ...
+    if length(str_uni_color)>1 && any(strcmp(obj.color_options.legend,{'separate','separate_gray'})) && ...
+            ~any(strcmpi(obj.layout_options.omit_legend,'color')) 
+        % Check for 'omit_legend' - added 25-04-21 Paul Anderson
+        
             %~(length(str_uni_color)==length(str_uni_marker) && all(strcmp(str_uni_color, str_uni_marker))) && ...
             %~(length(str_uni_color)==length(str_uni_linestyle) && all(strcmp(str_uni_color, str_uni_linestyle))) && ...
             %~(length(str_uni_color)==length(str_uni_size) && all(strcmp(str_uni_color, str_uni_size)))
@@ -728,8 +733,9 @@ if obj.layout_options.legend
     end
     
     %Lightness legend
-    if length(uni_lightness)>1 && any(strcmp(obj.color_options.legend,{'separate','separate_gray','merge'}))
-        
+    if length(uni_lightness)>1 && any(strcmp(obj.color_options.legend,{'separate','separate_gray','merge'})) && ...
+             ~any(strcmpi(obj.layout_options.omit_legend,'lightness'))  % Check for 'omit_legend' - added 25-04-21 Paul Anderson
+  
         if ischar(obj.color_options.map) && strcmp(obj.color_options.map,'lch') && strcmp(obj.color_options.legend,'separate_gray')
             %With LCH we can generate a correct desaturated legend
             lightness_legend_map=pa_LCH2RGB([linspace(obj.color_options.lightness_range(1),obj.color_options.lightness_range(2),length(uni_lightness))' ...
@@ -774,7 +780,10 @@ if obj.layout_options.legend
     end
     
     %marker legend
-    if length(str_uni_marker)>1
+    if length(str_uni_marker)>1 && ...
+        ~any(strcmpi(obj.layout_options.omit_legend,'marker'))  
+    % Check for 'omit_legend' - added 25-04-21 Paul Anderson
+
 
         % If marker groups are the same as color groups we combine the
         % legends by drawing each marker legend the corresponding color
@@ -793,7 +802,9 @@ if obj.layout_options.legend
     end
     
     %linestyle legend
-    if length(str_uni_linestyle)>1
+    if length(str_uni_linestyle)>1 && ...
+        ~any(strcmpi(obj.layout_options.omit_legend,'linestyle'))  
+    % Check for 'omit_legend' - added 25-04-21 Paul Anderson
 
         % If linestyle groups are the same as color groups we combine the
         % legends by drawing each linestyle legend the corresponding color
@@ -812,7 +823,9 @@ if obj.layout_options.legend
     end
     
     %Size legend
-    if length(str_uni_size)>1
+    if length(str_uni_size)>1 && ...
+        ~any(strcmpi(obj.layout_options.omit_legend,'size'))  
+    % Check for 'omit_legend' - added 25-04-21 Paul Anderson
 
         % If size groups are the same as color groups we combine the
         % legends by drawing each size legend the corresponding color
@@ -1233,18 +1246,20 @@ end
 
 
 %White background !
-set(gcf,'color','w','PaperPositionMode','auto');
+try
+axParent = obj.current_facet_axes.Parent; 
+set(axParent,'color','w','PaperPositionMode','auto');
 
 % Make everything tight and set the resize function so that it stays so
 if do_redraw  && ~obj.multi.active %Redrawing for multiple plots is handled at the beginning of draw()
     redraw(obj);
     if verLessThan('matlab','8.4')
-        set(gcf,'ResizeFcn',@(a,b)redraw(obj));
+        set(axParent,'ResizeFcn',@(a,b)redraw(obj));
     else
-        set(gcf,'SizeChangedFcn',@(a,b)redraw(obj));
+        set(axParent,'SizeChangedFcn',@(a,b)redraw(obj));
     end
 end
-
+end
 
 %Clean up results
 result_fields=fieldnames(obj.results);

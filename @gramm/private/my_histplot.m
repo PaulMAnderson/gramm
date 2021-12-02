@@ -147,7 +147,8 @@ switch params.geom
         xpatch=[bar_right ; bar_left ; bar_left ; bar_right];
         ypatch=[zeros(1,length(bincounts)) ; zeros(1,length(bincounts)) ; bincounts' ; bincounts'];
         [xpatch,ypatch]=to_polar(obj,xpatch,ypatch);
-        results.bar_handle=patch(xpatch,...
+        results.bar_handle=patch(obj.current_facet_axes, ... % Added 12.11.2021 PMA
+            xpatch,...
             ypatch,...
             [1 1 1],'FaceColor',face_color,'EdgeColor',edge_color,'FaceAlpha',face_alpha,'EdgeAlpha',edge_alpha);
         
@@ -159,13 +160,15 @@ switch params.geom
         xpatch=[bar_mid(1:end-1) ; bar_mid(2:end) ; bar_mid(2:end);bar_mid(1:end-1)];
         ypatch=[zeros(1,length(bincounts)-1) ; zeros(1,length(bincounts)-1) ; bincounts(2:end)' ; bincounts(1:end-1)'];
         [xpatch,ypatch]=to_polar(obj,xpatch,ypatch);
-        results.fill_handle=patch(xpatch,ypatch,[1 1 1],'FaceColor',face_color,'EdgeColor','none','FaceAlpha',face_alpha);
+        results.fill_handle=patch(obj.current_facet_axes, ... % Added 12.11.2021 PMA
+            xpatch,ypatch,[1 1 1],'FaceColor',face_color,'EdgeColor','none','FaceAlpha',face_alpha);
         
     case 'stacked_bar'
         xpatch=[binranges(1:end-1)+spacing ; binranges(2:end)-spacing ; binranges(2:end)-spacing ; binranges(1:end-1)+spacing];
         ypatch=[obj.extra.stacked_bar_height ; obj.extra.stacked_bar_height ; obj.extra.stacked_bar_height+bincounts' ; obj.extra.stacked_bar_height+bincounts'];
         [xpatch,ypatch]=to_polar(obj,xpatch,ypatch);
-        results.bar_handle=patch(xpatch,...
+        results.bar_handle=patch(obj.current_facet_axes, ... % Added 12.11.2021 PMA
+            xpatch,...
             ypatch,...
             [1 1 1],'FaceColor',face_color,'EdgeColor',edge_color,'FaceAlpha',face_alpha,'EdgeAlpha',edge_alpha);
         obj.extra.stacked_bar_height=obj.extra.stacked_bar_height+bincounts';
@@ -173,19 +176,22 @@ switch params.geom
         xtemp=[binranges(1:end-1) ; binranges(2:end)];
         ytemp=[bincounts' ; bincounts'];
         [xtemp,ytemp]=to_polar(obj,xtemp(:),ytemp(:));
-        results.line_handle=plot(xtemp,ytemp,'LineStyle',draw_data.line_style,'Color',edge_color,'lineWidth',draw_data.line_size);
+        results.line_handle=plot(obj.current_facet_axes, ... % Added 12.11.2021 PMA
+            xtemp,ytemp,'LineStyle',draw_data.line_style,'Color',edge_color,'lineWidth',draw_data.line_size);
         
         xpatch=[binranges(1:end-1) ; binranges(2:end) ; binranges(2:end) ; binranges(1:end-1)];
         ypatch=[obj.extra.stacked_bar_height ; obj.extra.stacked_bar_height ; obj.extra.stacked_bar_height+bincounts' ; obj.extra.stacked_bar_height+bincounts'];
         [xpatch,ypatch]=to_polar(obj,xpatch,ypatch);
         
-        results.fill_handle=patch(xpatch,ypatch,[1 1 1],'FaceColor',face_color,'EdgeColor','none','FaceAlpha',face_alpha);
+        results.fill_handle=patch(obj.current_facet_axes, ... % Added 12.11.2021 PMA
+            xpatch,ypatch,[1 1 1],'FaceColor',face_color,'EdgeColor','none','FaceAlpha',face_alpha);
         
     case 'point'
         xtemp=bar_mid;
         ytemp=bincounts(1:end)';
         [xtemp,ytemp]=to_polar(obj,xtemp,ytemp);
-        results.point_handle=plot(xtemp,ytemp,draw_data.marker,'MarkerEdgeColor','none','markerSize',draw_data.point_size,'MarkerFaceColor',draw_data.color);
+        results.point_handle=plot(obj.current_facet_axes, ... % Added 12.11.2021 PMA
+            xtemp,ytemp,draw_data.marker,'MarkerEdgeColor','none','markerSize',draw_data.point_size,'MarkerFaceColor',draw_data.color);
 end
 
 

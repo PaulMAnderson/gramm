@@ -7,6 +7,9 @@ classdef gramm < matlab.mixin.Copyable
         title_axe_handle %Store the handle of the title axis
         facet_axes_handles %Stores the handles of the facet axes
         results %Stores the results of the draw functions and statistics computations
+        current_facet_axes % Stores the current handle - 
+        % Added 12-11-2021 PMA Had weird issues with UI figure and
+        % uitabgroup losing the handle
         
     end
     
@@ -210,7 +213,7 @@ classdef gramm < matlab.mixin.Copyable
         obj=set_order_options(obj,varargin)
         obj=set_stat_options(obj,varargin)
         obj=set_continuous_color(obj,varargin)
-        obj=no_legend(obj)
+        obj=no_legend(obj,varargin) % modified 27-04-21 Paul Anderson
         obj=set_limit_extra(obj,x_extra,y_extra,z_extra)
         obj=axe_property(obj,varargin)
         obj=set_datetick(obj,varargin)

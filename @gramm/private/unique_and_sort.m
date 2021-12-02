@@ -59,6 +59,9 @@ else %Other orderings
             y=sort(y); %default
         case -1
             y=flipud(sort(y)); %We use flipud instead of the 'descend' option because somehow it isn't supported for cellstr.
+        otherwise
+                        y=sort(y); %default
+
     end
     %case 0 does nothing (keep original ordering)
 end
