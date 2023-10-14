@@ -2,11 +2,15 @@ function [results] = my_histplot(obj,draw_data,params,setylim)
 
 %Presets for dodge parameter
 if isempty(params.dodge)
-    if strcmp(params.geom,'bar') && draw_data.n_colors>1  %With 'bar' do we dodge by default if there are several colors
-        params.dodge=0.8;
-    else
-        params.dodge=0; %With all others we put don't dodge
-    end
+    try
+        if strcmp(params.geom,'bar') && draw_data.n_colors>1  %With 'bar' do we dodge by default if there are several colors
+            params.dodge=0.8;
+        else
+            params.dodge=0; %With all others we put don't dodge
+        end
+        catch
+                    params.dodge=0; %With all others we put don't dodge
+        end
 end
 
 %Presets for width parameter
@@ -156,7 +160,8 @@ switch params.geom
         xtemp=bar_mid;
         ytemp=bincounts(1:end)';
         [xtemp,ytemp]=to_polar(obj,xtemp,ytemp);
-        results.line_handle=plot(xtemp,ytemp,'LineStyle',draw_data.line_style,'Color',edge_color,'lineWidth',draw_data.line_size);
+        results.line_handle=plot(obj.current_facet_axes, ... % Added 12.11.2021 PMA
+            xtemp,ytemp,'LineStyle',draw_data.line_style,'Color',edge_color,'lineWidth',draw_data.line_size);
         xpatch=[bar_mid(1:end-1) ; bar_mid(2:end) ; bar_mid(2:end);bar_mid(1:end-1)];
         ypatch=[zeros(1,length(bincounts)-1) ; zeros(1,length(bincounts)-1) ; bincounts(2:end)' ; bincounts(1:end-1)'];
         [xpatch,ypatch]=to_polar(obj,xpatch,ypatch);

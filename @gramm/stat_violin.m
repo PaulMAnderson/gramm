@@ -27,6 +27,9 @@ my_addParameter(p,'fill','face')
 my_addParameter(p,'width',0.6)
 my_addParameter(p,'dodge',0.7)
 my_addParameter(p,'half',false)
+my_addParameter(p,'alternate',true) % Added 18-11-2022 PMA 
+% I don't always want half violins to swap sides
+
 parse(p,varargin{:});
 
 obj.geom=vertcat(obj.geom,{@(dobj,dd)my_violin(dobj,dd,p.Results)});
@@ -45,7 +48,7 @@ uni_x(diff(uni_x)<1e-10)=[];
 dens=cell(length(uni_x),1);
 dens_pos=cell(length(uni_x),1);
 
-if params.half
+if params.half && params.alternate
     params.dodge=0;
 end
 
@@ -109,22 +112,30 @@ for ind_x=1:length(uni_x)
         
         %Adjust width
         dens{ind_x}=dens{ind_x}*boxw;
-        
-        
-        if params.half %If in half mode
-            if ~mod(draw_data.color_index,2) %We draw right half if even index
-                xpatch=[boxmid(ind_x)-dens{ind_x}(1:end-1) ; ...
-                    boxmid(ind_x)+zeros(1,length(dens{ind_x})-1) ; ...
-                    boxmid(ind_x)+zeros(1,length(dens{ind_x})-1);  ...
-                    boxmid(ind_x)-dens{ind_x}(2:end)];
-            else %left half if odd
-                xpatch=[boxmid(ind_x)+zeros(1,length(dens{ind_x})-1) ; ...
-                    boxmid(ind_x)+dens{ind_x}(1:end-1) ; ...
-                    boxmid(ind_x)+dens{ind_x}(2:end) ; ...
-                    boxmid(ind_x)+zeros(1,length(dens{ind_x})-1)];
                 
+        if params.half %If in half mode
+            % And alternation is off, then all patches are righ side
+            if ~params.alternate
+                %We draw right half if even index or if alternation is off
+                xpatch=[boxmid(ind_x)+zeros(1,length(dens{ind_x})-1) ; ...
+                        boxmid(ind_x)+dens{ind_x}(1:end-1) ; ...
+                        boxmid(ind_x)+dens{ind_x}(2:end) ; ...
+                        boxmid(ind_x)+zeros(1,length(dens{ind_x})-1)];
+            else
+                if ~mod(draw_data.color_index,2)
+                    %We draw left half if even index
+                    xpatch=[boxmid(ind_x)-dens{ind_x}(1:end-1) ; ...
+                        boxmid(ind_x)+zeros(1,length(dens{ind_x})-1) ; ...
+                        boxmid(ind_x)+zeros(1,length(dens{ind_x})-1);  ...
+                        boxmid(ind_x)-dens{ind_x}(2:end)];
+                else %right half if odd
+                    xpatch=[boxmid(ind_x)+zeros(1,length(dens{ind_x})-1) ; ...
+                        boxmid(ind_x)+dens{ind_x}(1:end-1) ; ...
+                        boxmid(ind_x)+dens{ind_x}(2:end) ; ...
+                        boxmid(ind_x)+zeros(1,length(dens{ind_x})-1)];
+                    
+                end
             end
-            
         else %Otherwise draw full violin
             xpatch=[boxmid(ind_x)-dens{ind_x}(1:end-1) ; ...
                 boxmid(ind_x)+dens{ind_x}(1:end-1) ; ...
@@ -142,13 +153,20 @@ for ind_x=1:length(uni_x)
         
         %Draw lines
         if params.half %If in half mode
-            if ~mod(draw_data.color_index,2) %We draw right half if even index
-                lines(ind_x)=line(boxmid(ind_x)-[0 dens{ind_x} 0 0] , ...
-                    [dens_pos{ind_x}(1) dens_pos{ind_x} dens_pos{ind_x}(end) dens_pos{ind_x}(1)],temp_line_params{:});
-                
-            else %left half if odd
-                lines(ind_x)=line(boxmid(ind_x)+[0 dens{ind_x} 0 0] , ...
-                    [dens_pos{ind_x}(1) dens_pos{ind_x} dens_pos{ind_x}(end) dens_pos{ind_x}(1)],temp_line_params{:});
+            % And alternation is off, then all patches are righ side
+            if ~params.alternate
+                %We draw right half if even index or if alternation is off
+                 lines(ind_x)=line(boxmid(ind_x)+[0 dens{ind_x} 0 0] , ...
+                        [dens_pos{ind_x}(1) dens_pos{ind_x} dens_pos{ind_x}(end) dens_pos{ind_x}(1)],temp_line_params{:});                  
+            else
+                if ~mod(draw_data.color_index,2) %We draw left half if even index
+                    lines(ind_x)=line(boxmid(ind_x)-[0 dens{ind_x} 0 0] , ...
+                        [dens_pos{ind_x}(1) dens_pos{ind_x} dens_pos{ind_x}(end) dens_pos{ind_x}(1)],temp_line_params{:});
+                    
+                else %right half if odd
+                    lines(ind_x)=line(boxmid(ind_x)+[0 dens{ind_x} 0 0] , ...
+                        [dens_pos{ind_x}(1) dens_pos{ind_x} dens_pos{ind_x}(end) dens_pos{ind_x}(1)],temp_line_params{:});
+                end
             end
             
         else %Otherwise draw full violin

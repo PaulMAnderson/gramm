@@ -12,6 +12,7 @@ function obj=stat_boxplot(obj,varargin)
 % - 'dodge' allows to set the spacing between boxes of
 %   different colors within an unique value of x.
 % - 'width' allows to set the width of the individual boxes.
+% - 'outliers' allows removing data points outside of the 1.5*IQR.
 % See the documentation of stat_summary() for the behavior of
 % 'dodge' and 'width'
 
@@ -19,14 +20,12 @@ p=inputParser;
 my_addParameter(p,'width',0.6);
 my_addParameter(p,'dodge',0.7);
 my_addParameter(p,'notch',false);
+my_addParameter(p, 'outliers',true); % Added 14-11-22 PMA
+my_addParameter(p, 'lineWidth',0.5); % Added 14-11-22 PMA
 parse(p,varargin{:});
 
 obj.geom=vertcat(obj.geom,{@(dobj,dd)my_boxplot(dobj,dd,p.Results)});
 obj.results.stat_boxplot={};
-
-end
-
-
 
 
 function hndl=my_boxplot(obj,draw_data,params)
@@ -96,6 +95,7 @@ obj.results.stat_boxplot{obj.result_ind,1}.boxplot_data=p;
 
 
 if params.dodge>0
+    % Error here - I want different colors
     boxw=draw_data.dodge_avl_w*params.width./(draw_data.n_colors);
 else
     boxw=draw_data.dodge_avl_w*params.width;
@@ -115,38 +115,63 @@ if params.notch
 else
     xpatch=[boxleft' ; boxright' ; boxright' ; boxleft'];
     ypatch=[p(:,2)' ; p(:,2)' ; p(:,4)' ; p(:,4)'];
-
 end
 
 %Draw boxes
 hndl=patch(xpatch,...
     ypatch,...
-    [1 1 1],'FaceColor',draw_data.color,'EdgeColor','k','FaceAlpha',1,'EdgeAlpha',1);
+    [1 1 1],'FaceColor',draw_data.color,...
+    'EdgeColor','k','FaceAlpha',1,'EdgeAlpha',1,...
+    'LineWidth',params.lineWidth);
 
 obj.results.stat_boxplot{obj.result_ind,1}.box_handle=hndl;
 
 %Draw medians
 if params.notch
-    obj.results.stat_boxplot{obj.result_ind,1}.median_handle=line([notchleft' ; notchright'],[p(:,4)' ; p(:,4)'],'Color','k');
+    obj.results.stat_boxplot{obj.result_ind,1}.median_handle=...
+        line([notchleft' ; notchright'],[p(:,4)' ; p(:,4)'],'Color','k',...
+        'LineWidth',params.lineWidth);
 else
-    obj.results.stat_boxplot{obj.result_ind,1}.median_handle=line([boxleft' ; boxright'],[p(:,3)' ; p(:,3)'],'Color','k');
+    obj.results.stat_boxplot{obj.result_ind,1}.median_handle=...
+        line([boxleft' ; boxright'],[p(:,3)' ; p(:,3)'],'Color','k',...
+        'LineWidth',params.lineWidth);
 end
 
 %Draw whiskers
-obj.results.stat_boxplot{obj.result_ind,1}.lower_whisker_handle=line([boxmid' ; boxmid'],[p(:,1)' ; p(:,2)'],'Color','k');
-obj.results.stat_boxplot{obj.result_ind,1}.upper_whisker_handle=line([boxmid' ; boxmid'],[p(:,end-1)' ; p(:,end)'],'Color','k');
+obj.results.stat_boxplot{obj.result_ind,1}.lower_whisker_handle=...
+    line([boxmid' ; boxmid'],[p(:,1)' ; p(:,2)'],'Color','k',...
+    'LineWidth',params.lineWidth);
+obj.results.stat_boxplot{obj.result_ind,1}.upper_whisker_handle=...
+    line([boxmid' ; boxmid'],[p(:,end-1)' ; p(:,end)'],'Color','k',...
+    'LineWidth',params.lineWidth);
 
-%Draw outliers - Modified to not draw outliers
-% obj.results.stat_boxplot{obj.result_ind,1}.outliers_handle=plot(boxmid(outliersx),outliersy,'o','MarkerEdgeColor','none','MarkerFaceColor',draw_data.color);
-% Alternative that highlights the outliers
-obj.results.stat_boxplot{obj.result_ind,1}.outliers_handle=plot(boxmid(outliersx),outliersy,'o','MarkerEdgeColor','k','MarkerFaceColor',draw_data.color);
+%Draw outliers - Modified to not draw outliers dependent on parameter
+% Alternative that highlights the outliers - respects the set_point_options
+% parameter
+if  params.outliers % Added 14-11-22 PMA
+%    obj.results.stat_boxplot{obj.result_ind,1}.outliers_handle=plot(boxmid(outliersx),outliersy,'o','MarkerEdgeColor','none','MarkerFaceColor',draw_data.color);
+obj.results.stat_boxplot{obj.result_ind,1}.outliers_handle=plot(boxmid(outliersx),outliersy,...
+    draw_data.marker,'MarkerEdgeColor',draw_data.color,...
+    'MarkerFaceColor',draw_data.color,...
+    'MarkerSize',draw_data.point_size);
+end
 
 %Adjust limits
 obj.plot_lim.maxx(obj.current_row,obj.current_column)=max(max(boxright),obj.plot_lim.maxx(obj.current_row,obj.current_column));
 obj.plot_lim.minx(obj.current_row,obj.current_column)=min(min(boxleft),obj.plot_lim.minx(obj.current_row,obj.current_column));
 
-obj.plot_lim.maxy(obj.current_row,obj.current_column)=max(max(p(:,end)),obj.plot_lim.maxy(obj.current_row,obj.current_column));
-obj.plot_lim.miny(obj.current_row,obj.current_column)=min(min(p(:,1)),obj.plot_lim.miny(obj.current_row,obj.current_column));
-
-
+% This will be different if outliers are shown or not
+if params.outliers
+    obj.plot_lim.maxy(obj.current_row,obj.current_column)=max(max(p(:,end)),obj.plot_lim.maxy(obj.current_row,obj.current_column));
+    obj.plot_lim.miny(obj.current_row,obj.current_column)=min(min(p(:,1)),obj.plot_lim.miny(obj.current_row,obj.current_column));
+else
+    if obj.firstrun(obj.current_row,obj.current_column) %Initialize for the first run in the subplot
+        obj.plot_lim.maxy(obj.current_row,obj.current_column) = max(max(p(:,end)));
+        obj.plot_lim.miny(obj.current_row,obj.current_column) = min(min(p(:,1)));
+    else %Update for subsequent runs in the subplot
+        obj.plot_lim.maxy(obj.current_row,obj.current_column) = ...
+            max(obj.plot_lim.maxy(obj.current_row,obj.current_column),max(p(:,end)));
+        obj.plot_lim.miny(obj.current_row,obj.current_column) = ...
+            min(obj.plot_lim.miny(obj.current_row,obj.current_column),min(p(:,1)));
+    end
 end

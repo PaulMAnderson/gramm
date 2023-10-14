@@ -116,6 +116,9 @@ my_addParameter(p,'setylim',false);
 my_addParameter(p,'interp','none');
 my_addParameter(p,'interp_in',-1);
 my_addParameter(p,'bin_in',-1);
+% Added 19-06-2022 PMA - wanted to be able to offset bars so I can have
+% bars and points in the same plots
+my_addParameter(p,'offset',0);
 parse(p,varargin{:});
 
 obj.geom=vertcat(obj.geom,{@(dobj,dd)my_summary(dobj,dd,p.Results)});
@@ -362,6 +365,13 @@ end
 obj.results.stat_summary{obj.result_ind,1}.x=uni_x;
 obj.results.stat_summary{obj.result_ind,1}.y=ymean;
 obj.results.stat_summary{obj.result_ind,1}.yci=yci;
+
+% Added 19-06-2022 PMA
+% Do we want to offset the bars (i.e. to plot with data points alongside)
+if params.offset ~= 0
+%     uni_x = uni_x + params.width.*params.offset;
+    uni_x = uni_x + params.offset;
+end
 
 %Do the actual plotting
 hndl=plotci(obj,uni_x,ymean,yci,draw_data,params.geom,params.dodge,params.width);

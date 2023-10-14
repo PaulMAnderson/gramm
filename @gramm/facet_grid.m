@@ -21,6 +21,7 @@ function obj=facet_grid(obj,row,col,varargin)
 %   the facets proportional to the extent of the y axis limits. 'free'
 %   changes both the width and the height. This option has an
 %   effect only if the corresponding 'scale' parameter is set.
+% - 'column_lables','row_labels' logical input to show labels or not
 
 p=inputParser;
 my_addParameter(p,'scale','fixed'); %options 'free' 'free_x' 'free_y' 'independent'

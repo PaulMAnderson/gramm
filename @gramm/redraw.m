@@ -54,7 +54,7 @@ if isempty(obj.aes.x) || ~obj.layout_options.redraw
     return
 end
 
-
+% Uifigures 
 set(gcf,'Unit','pixels');
 figure_position=get(gcf,'Position');
 
@@ -149,31 +149,35 @@ else
 end
 
 %Move legend
-if strcmp(obj.layout_options.legend_position,'auto')
-    if strcmp(obj.layout_options.legend_width,'auto') % If we do not have a custom legend width
-        if ~isempty(legend_text_pos)
-            %Here we correct by the width to get the coordinates in
-            %normalized values
-            [max_text_x,max_ind]=max(cellfun(@(p)legend_pos(1)+legend_pos(3)*(p(1)+p(3))/legend_axis_width,legend_text_pos));
-            if first_redraw
-                obj.redraw_cache.max_legend_ind=max_ind; %Cache the index of which text object is the rightmost
+try
+    if strcmp(obj.layout_options.legend_position,'auto')
+        if strcmp(obj.layout_options.legend_width,'auto') % If we do not have a custom legend width
+            if ~isempty(legend_text_pos)
+                %Here we correct by the width to get the coordinates in
+                %normalized values
+                [max_text_x,max_ind]=max(cellfun(@(p)legend_pos(1)+legend_pos(3)*(p(1)+p(3))/legend_axis_width,legend_text_pos));
+                if first_redraw
+                    obj.redraw_cache.max_legend_ind=max_ind; %Cache the index of which text object is the rightmost
+                end
+                %Move accordingly (here the max available x position takes
+                %in account the multiple plots
+                legend_pos = legend_pos+[obj.multi.orig(2)+obj.multi.size(2)-spacing_w-max_text_x 0 0 0];
+            else
+                legend_pos = [obj.multi.orig(2)+obj.multi.size(2) legend_pos(2) legend_pos(3) legend_pos(4)];
             end
-            %Move accordingly (here the max available x position takes
-            %in account the multiple plots
-            legend_pos = legend_pos+[obj.multi.orig(2)+obj.multi.size(2)-spacing_w-max_text_x 0 0 0];
         else
-            legend_pos = [obj.multi.orig(2)+obj.multi.size(2) legend_pos(2) legend_pos(3) legend_pos(4)];
+            %Set legend position according to custom legend width
+            legend_pos = [obj.multi.orig(2)+(1-obj.layout_options.legend_width)*obj.multi.size(2) legend_pos(2) legend_pos(3) legend_pos(4)];
         end
+        set(obj.legend_axe_handle,'Position',legend_pos);
     else
-        %Set legend position according to custom legend width
-        legend_pos = [obj.multi.orig(2)+(1-obj.layout_options.legend_width)*obj.multi.size(2) legend_pos(2) legend_pos(3) legend_pos(4)];
+        % We need something in legend_pos but don't actually move the legend
+        legend_pos = [obj.multi.orig(2)+obj.multi.size(2) 0 0 0];
     end
-    set(obj.legend_axe_handle,'Position',legend_pos);
-else
+catch
     % We need something in legend_pos but don't actually move the legend
     legend_pos = [obj.multi.orig(2)+obj.multi.size(2) 0 0 0];
 end
-
 %% Move title
 
 %Move title to the top and center it according to axes

@@ -60,9 +60,13 @@ if sum(~isnan(combx))>2 && sum(~isnan(comby))>2 %numel(combx)>2 &&
     if params.disp_fit
         if obj.firstrun(obj.current_row,obj.current_column)
             obj.extra.mdltext(obj.current_row,obj.current_column)=0.05;
-            %obj.firstrun(obj.current_row,obj.current_column)=0;
+             % Modified PMA 6-04-2023 - Text was too low with many rows
+            % obj.extra.mdltext(obj.current_row,obj.current_column)=0.2;
+            obj.firstrun(obj.current_row,obj.current_column)=0;
         else
             obj.extra.mdltext(obj.current_row,obj.current_column)=obj.extra.mdltext(obj.current_row,obj.current_column)+0.03;
+            % Modified PMA 6-04-2023 - Text was too low with many rows
+            % obj.extra.mdltext(obj.current_row,obj.current_column)=obj.extra.mdltext(obj.current_row,obj.current_column)+0.06;
         end
         obj.results.stat_glm{obj.result_ind,1}.text_handle=text('Units','normalized','Position',[0.1 obj.extra.mdltext(obj.current_row,obj.current_column)],'color',draw_data.color,...
             'String',[ num2str(mdl.Coefficients.Estimate(1),5) '^{' pval_to_star(mdl.Coefficients.pValue(1)) ...

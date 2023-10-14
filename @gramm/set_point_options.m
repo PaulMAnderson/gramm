@@ -10,7 +10,7 @@ function obj = set_point_options( obj , varargin )
 % 'input_fun': Provide a function handle to transform the 'size' aesthetic
 % values in actual sizes when 'use_input' is set to true. Default is
 % identity
-% 'styles': Provide order for marker style categories. Default is {'o' 's' 'd' '^' 'v' '>' '<' 'p' 'h' '*' '+' 'x'}
+% 'markers': Provide order for marker style categories. Default is {'o' 's' 'd' '^' 'v' '>' '<' 'p' 'h' '*' '+' 'x'}
 
 
 p=inputParser;

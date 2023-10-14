@@ -14,6 +14,7 @@ p=inputParser;
 my_addParameter(p,'nbins',[30 30]);
 my_addParameter(p,'edges',{});
 my_addParameter(p,'geom','image'); %contour
+my_addParameter(p,'smooth',false); % Added PMA - 12-04-2023
 
 parse(p,varargin{:});
 
@@ -49,7 +50,15 @@ else
 end
 
 obj.results.stat_bin2d{obj.result_ind,1}.edges=C;
+% Added PMA 12-04-2023 
+% Smooths the bin data, using a 2d gaussian kernel with sigma defined as
+% 1/3 of the bin size
+if params.smooth
+%    N = imgaussfilt(N,'FilterSize',round(params.nbins./3));
+ N = imgaussfilt(N,'FilterSize',3);
+end
 obj.results.stat_bin2d{obj.result_ind,1}.counts=N;
+
 
 switch params.geom
     case 'contour'
